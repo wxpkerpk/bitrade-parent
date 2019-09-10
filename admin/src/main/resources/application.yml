@@ -1,0 +1,112 @@
+aliyun:
+  accessKeyId: '@aliyun.accessKeyId@'
+  accessKeySecret: '@aliyun.accessKeySecret@'
+  ossBucketName: '@aliyun.ossBucketName@'
+  ossEndpoint: '@aliyun.ossEndpoint@'
+bdtop:
+  system:
+    data-center-id: '@bdtop.system.data-center-id@'
+    md5:
+      key: '@bdtop.system.md5.key@'
+    work-id: '@bdtop.system.work-id@'
+coin:
+  not:
+    sync: '@coin.not.sync@'
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://127.0.0.1:7000/eureka/
+  instance:
+    prefer-ip-address: true
+google:
+  auth:
+    url: '@google.auth.url@'
+management:
+  context-path: '@management.context-path@'
+  security:
+    enabled: false
+redis:
+  hostName: 127.0.0.1
+  password: wxpker
+  port: 6379
+security:
+  user:
+    name: '@security.user.name@'
+    password: '@security.user.password@'
+server:
+  context-path: /admin
+  port: 6010
+sms:
+  driver: '@sms.driver@'
+  gateway: '@sms.gateway@'
+  password: '@sms.password@'
+  sign: '@sms.sign@'
+  username: '@sms.username@'
+spring:
+  application:
+    name: admin
+  data:
+    jpa:
+      repositories:
+        enabled: true
+    mongodb:
+      uri: mongodb://wxpker:wxpker@localhost:27017/exchange
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    filters: stat,wall,log4j
+    initialSize: 5
+    maxActive: 200
+    maxPoolPreparedStatementPerConnectionSize: 20
+    maxWait: 60000
+    minEvictableIdleTimeMillis: 300000
+    minIdle: 5
+    password: 666666pk
+    poolPreparedStatements: true
+    testOnBorrow: false
+    testOnReturn: false
+    testWhileIdle: true
+    timeBetweenEvictionRunsMillis: 60000
+    type: com.alibaba.druid.pool.DruidDataSource
+    url: jdbc:mysql://127.0.0.1:3306/test?characterEncoding=utf-8&serverTimezone=GMT%2B8
+    username: root
+    validationQuery: SELECT 1
+  devtools:
+    restart:
+      enabled: true
+  http:
+    multipart:
+      maxFileSize: 10MB
+      maxRequestSize: 10MB
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    serialization:
+      indent_output: true
+    time-zone: GMT+8
+  jpa:
+    show-sql: true
+  kafka:
+    bootstrap-servers: 112.74.59.207:9092
+    consumer:
+      auto:
+        commit:
+          interval: 100
+        offset:
+          reset: earliest
+      concurrency: 9
+      enable:
+        auto:
+          commit: false
+      group:
+        id: default-group
+      maxPollRecordsConfig: 50
+      session:
+        timeout: 15000
+    producer:
+      batch:
+        size: 256
+      buffer:
+        memory: 1048576
+      linger: 1
+      retries: 0
+  session:
+    store-type: none

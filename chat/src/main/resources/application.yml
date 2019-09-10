@@ -1,0 +1,62 @@
+apns:
+  bundle-id: BUHUO.digitalCurrencytestbihuo
+  cert-file-password: 223322
+  cert-file-path: /web/apns.p12
+  dev-env: true
+aqmd:
+  netty:
+    bossThreadSize: 1
+    deal-handler-thread-size: 10
+    defaultTimeout: 30
+    direct-access-command: 20021,20022,20031,20032,20033,20034,20035,20036,20037,20038
+    direct-access-flag: 1
+    max-frame-length: 2147483647
+    max-timeout: 60
+    packetHeaderLength: 4
+    port: 28902
+    serviceLoggerLevel: debug
+    websocket-flag: 1
+    websocket-port: 28903
+    worker-thread-size: 3
+    writer-idle: 200
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://127.0.0.1:7000/eureka/
+  instance:
+    prefer-ip-address: true
+redis:
+  hostName: 127.0.0.1
+  password: wxpker
+  port: 6379
+server:
+  context-path: /chat
+  port: 6008
+spring:
+  data:
+    jpa:
+      repositories:
+        enabled: true
+    mongodb:
+      uri: mongodb://wxpker:wxpker@localhost:27017/exchange
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    filters: stat,wall,log4j
+    initialSize: 5
+    maxActive: 200
+    maxPoolPreparedStatementPerConnectionSize: 20
+    maxWait: 60000
+    minEvictableIdleTimeMillis: 300000
+    minIdle: 5
+    password: 666666pk
+    poolPreparedStatements: true
+    testOnBorrow: false
+    testOnReturn: false
+    testWhileIdle: true
+    timeBetweenEvictionRunsMillis: 60000
+    type: com.alibaba.druid.pool.DruidDataSource
+    url: jdbc:mysql://127.0.0.1:3306/test?characterEncoding=utf-8&serverTimezone=GMT%2B8
+    username: root
+    validationQuery: SELECT 1
+  jpa:
+    show-sql: true

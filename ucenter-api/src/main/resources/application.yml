@@ -1,0 +1,135 @@
+#aliyun:
+#  accessKeyId: '@aliyun.accessKeyId@'
+#  accessKeySecret: '@aliyun.accessKeySecret@'
+#  ossBucketName: '@aliyun.ossBucketName@'
+#  ossEndpoint: '@aliyun.ossEndpoint@'
+bdtop:
+  system:
+    data-center-id: 1
+    host: 127.0.0.1
+    md5:
+      key: 111
+    name: wx
+    work-id: 2
+#coin:
+#  not:
+#    sync: '@coin.not.sync@'
+#commission:
+#  need:
+#    real-name: '@commission.need.real-name@'
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://127.0.0.1:7000/eureka/
+  instance:
+    prefer-ip-address: true
+geetest:
+  captchaId: ebd15c83cb7daecc963bc887b2c9cd76
+  newFailback: 0
+  privateKey: 26e11b2e8eda2ccbcf060756f2b845fd
+google:
+  auth:
+    url: '@google.auth.url@'
+management:
+  context-path: '@management.context-path@'
+  security:
+    enabled: false
+person:
+  promote:
+    prefix: '@person.promote.prefix@'
+redis:
+  hostName: 127.0.0.1
+  password: wxpker
+  port: 6379
+security:
+  user:
+    name: '@security.user.name@'
+    password: '@security.user.password@'
+server:
+  context-path: /uc
+  port: 6001
+sms:
+  driver: '@sms.driver@'
+  gateway: '@sms.gateway@'
+  password: '@sms.password@'
+  sign: '@sms.sign@'
+  username: '@sms.username@'
+spring:
+  application:
+    name: uc
+  data:
+    jpa:
+      repositories:
+        enabled: true
+    mongodb:
+      uri: mongodb://wxpker:wxpker@localhost:27017/exchange
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    filters: stat,wall,log4j
+    initialSize: 5
+    maxActive: 200
+    maxPoolPreparedStatementPerConnectionSize: 20
+    maxWait: 60000
+    minEvictableIdleTimeMillis: 300000
+    minIdle: 5
+    password: 666666pk
+    poolPreparedStatements: true
+    testOnBorrow: false
+    testOnReturn: false
+    testWhileIdle: true
+    timeBetweenEvictionRunsMillis: 60000
+    type: com.alibaba.druid.pool.DruidDataSource
+    url: jdbc:mysql://127.0.0.1:3306/test?characterEncoding=utf-8&serverTimezone=GMT%2B8
+    username: root
+    validationQuery: SELECT 1
+  devtools:
+    restart:
+      enabled: true
+  freemarker:
+    cache: false
+    template-loader-path: classpath:/templates
+  http:
+    multipart:
+      maxFileSize: 10MB
+      maxRequestSize: 10MB
+  jpa:
+    show-sql: true
+  kafka:
+    bootstrap-servers: 112.74.59.207:9092
+    consumer:
+      auto:
+        commit:
+          interval: 100
+        offset:
+          reset: earliest
+      concurrency: 9
+      enable:
+        auto:
+          commit: false
+      group:
+        id: default-group
+      maxPollRecordsConfig: 50
+      session:
+        timeout: 15000
+    producer:
+      batch:
+        size: 256
+      buffer:
+        memory: 1048576
+      linger: 1
+      retries: 0
+  mail:
+    host: smtp.exmail.qq.com
+    password: ''
+    port: 465
+    properties:
+      mail:
+        smtp:
+          auth: true
+          socketFactory:
+            class: javax.net.ssl.SSLSocketFactory
+          starttls:
+            enable: true
+            required: true
+    username: ''
+
