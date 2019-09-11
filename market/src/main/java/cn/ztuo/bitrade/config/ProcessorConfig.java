@@ -2,7 +2,7 @@ package cn.ztuo.bitrade.config;
 
 import cn.ztuo.bitrade.component.CoinExchangeRate;
 import cn.ztuo.bitrade.entity.ExchangeCoin;
-import cn.ztuo.bitrade.handler.MongoMarketHandler;
+import cn.ztuo.bitrade.handler.InfluxDbMarketHandler;
 import cn.ztuo.bitrade.handler.NettyHandler;
 import cn.ztuo.bitrade.handler.WebsocketMarketHandler;
 import cn.ztuo.bitrade.processor.CoinProcessor;
@@ -21,7 +21,7 @@ import java.util.List;
 public class ProcessorConfig {
 
     @Bean
-    public CoinProcessorFactory processorFactory(MongoMarketHandler mongoMarketHandler,
+    public CoinProcessorFactory processorFactory(InfluxDbMarketHandler mongoMarketHandler,
                                                  WebsocketMarketHandler wsHandler,
                                                  NettyHandler nettyHandler,
                                                  MarketService marketService,

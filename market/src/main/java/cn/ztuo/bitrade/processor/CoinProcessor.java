@@ -36,7 +36,6 @@ public interface CoinProcessor {
 
     void initializeThumb();
 
-    void autoGenerate();
 
     void resetThumb();
 

@@ -1,6 +1,8 @@
 package cn.ztuo.bitrade.consumer;
 
 
+import cn.ztuo.bitrade.component.KLineInsertMessage;
+import cn.ztuo.bitrade.service.KlineService;
 import com.alibaba.fastjson.JSON;
 import cn.ztuo.bitrade.component.CoinExchangeRate;
 import cn.ztuo.bitrade.constant.NettyCommand;
@@ -8,7 +10,7 @@ import cn.ztuo.bitrade.entity.ExchangeCoin;
 import cn.ztuo.bitrade.entity.ExchangeOrder;
 import cn.ztuo.bitrade.entity.ExchangeTrade;
 import cn.ztuo.bitrade.entity.TradePlate;
-import cn.ztuo.bitrade.handler.MongoMarketHandler;
+import cn.ztuo.bitrade.handler.InfluxDbMarketHandler;
 import cn.ztuo.bitrade.handler.NettyHandler;
 import cn.ztuo.bitrade.handler.WebsocketMarketHandler;
 import cn.ztuo.bitrade.job.ExchangePushJob;
@@ -28,6 +30,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -44,6 +47,8 @@ public class ExchangeTradeConsumer {
     @Autowired
     private ExchangeOrderService exchangeOrderService;
     @Autowired
+    KlineService klineService;
+    @Autowired
     private NettyHandler nettyHandler;
     @Value("${second.referrer.award}")
     private boolean secondReferrerAward;
@@ -52,7 +57,7 @@ public class ExchangeTradeConsumer {
     private ExchangePushJob pushJob;
 
     @Autowired
-    private MongoMarketHandler mongoMarketHandler;
+    private InfluxDbMarketHandler mongoMarketHandler;
     @Autowired
     private WebsocketMarketHandler wsHandler;
 
@@ -105,8 +110,8 @@ public class ExchangeTradeConsumer {
             if (coinProcessor != null) {
                 coinProcessor.process(trades);
             }
-            pushJob.addTrades(symbol, trades);
             executor.submit(new HandleTradeThread(record));
+            pushJob.addTrades(symbol, trades);
             log.info("complete exchange process,{}ms used!", System.currentTimeMillis() - startTick);
         }
     }
@@ -213,9 +218,13 @@ public class ExchangeTradeConsumer {
         }
         @Override
         public void run() {
+
             try {
                 List<ExchangeTrade> trades = JSON.parseArray(record.value(), ExchangeTrade.class);
+
                 String symbol = record.key();
+
+
                 for (ExchangeTrade trade : trades) {
                     //成交明细处理
                     exchangeOrderService.processExchangeTrade(trade, secondReferrerAward);
@@ -226,6 +235,8 @@ public class ExchangeTradeConsumer {
                     messagingTemplate.convertAndSend("/topic/market/order-trade/" + symbol + "/" + sellOrder.getMemberId(), sellOrder);
                     nettyHandler.handleOrder(NettyCommand.PUSH_EXCHANGE_ORDER_TRADE, buyOrder);
                     nettyHandler.handleOrder(NettyCommand.PUSH_EXCHANGE_ORDER_TRADE, sellOrder);
+                    klineService.doKlineInsert(new KLineInsertMessage(symbol,trade.getPrice(),trade.getAmount(),trade.getTime()));
+
                 }
             } catch (Exception e) {
                 logger.info("撮合模块ERROR={}",e);

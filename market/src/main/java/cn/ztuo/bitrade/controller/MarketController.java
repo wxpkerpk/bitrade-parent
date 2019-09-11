@@ -1,6 +1,7 @@
 package cn.ztuo.bitrade.controller;
 
 
+import cn.ztuo.bitrade.service.*;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -9,10 +10,6 @@ import cn.ztuo.bitrade.constant.SysConstant;
 import cn.ztuo.bitrade.entity.*;
 import cn.ztuo.bitrade.processor.CoinProcessor;
 import cn.ztuo.bitrade.processor.CoinProcessorFactory;
-import cn.ztuo.bitrade.service.ExchangeTradeService;
-import cn.ztuo.bitrade.service.LeverCoinService;
-import cn.ztuo.bitrade.service.MarketService;
-import cn.ztuo.bitrade.service.ExchangeCoinService;
 import cn.ztuo.bitrade.util.MessageResult;
 import cn.ztuo.bitrade.util.RedisUtil;
 import cn.ztuo.bitrade.waiting.WaitingOrder;
@@ -22,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
@@ -50,7 +48,8 @@ public class MarketController extends BaseController{
     @Autowired
     private RedisUtil redisUtil;
 
-
+    @Autowired
+    KlineService klineService;
     /**
      * 查询默认交易对儿
      * @return
@@ -184,30 +183,21 @@ public class MarketController extends BaseController{
         return thumbs;
     }
 
+
+
     @RequestMapping("symbol-thumb-trend")
     public JSONArray findSymbolThumbWithTrend(){
         List<ExchangeCoin> coins = coinService.findAllEnabled();
-        //List<CoinThumb> thumbs = new ArrayList<>();
-        Calendar calendar = Calendar.getInstance();
-        //将秒、微秒字段置为0
-        calendar.set(Calendar.SECOND,0);
-        calendar.set(Calendar.MILLISECOND,0);
-        calendar.set(Calendar.MINUTE,0);
-        long nowTime = calendar.getTimeInMillis();
-        calendar.add(Calendar.HOUR_OF_DAY,-24);
+
+        long nowTime = System.currentTimeMillis();
         JSONArray array = new JSONArray();
-        long firstTimeOfToday = calendar.getTimeInMillis();
         for(ExchangeCoin coin:coins){
             CoinProcessor processor = coinProcessorFactory.getProcessor(coin.getSymbol());
             CoinThumb thumb = processor.getThumb();
             JSONObject json = (JSONObject) JSON.toJSON(thumb);
             json.put("zone",coin.getZone());
-            List<KLine> lines = marketService.findAllKLine(thumb.getSymbol(),firstTimeOfToday,nowTime,"1hour");
-            JSONArray trend = new JSONArray();
-            for(KLine line:lines){
-                trend.add(line.getClosePrice());
-            }
-            json.put("trend",trend);
+            List<Number> lines = klineService.getTendency(coin.getSymbol());
+            json.put("trend",lines);
             array.add(json);
         }
         return array;
@@ -223,29 +213,7 @@ public class MarketController extends BaseController{
      */
     @RequestMapping("history")
     public JSONArray findKHistory(String symbol,long from,long to,String resolution){
-        String period = "";
-        if(resolution.endsWith("H") || resolution.endsWith("h")){
-            period = resolution.substring(0,resolution.length()-1) + "hour";
-        }
-        else if(resolution.endsWith("D") || resolution.endsWith("d")){
-            period = resolution.substring(0,resolution.length()-1) + "day";
-        }
-        else if(resolution.endsWith("W") || resolution.endsWith("w")){
-            period = resolution.substring(0,resolution.length()-1) + "week";
-        }
-        else if(resolution.endsWith("M") || resolution.endsWith("m")){
-            period = resolution.substring(0,resolution.length()-1) + "month";
-        }
-        else{
-            Integer val = Integer.parseInt(resolution);
-            if(val < 60) {
-                period = resolution + "min";
-            }
-            else {
-                period = (val/60) + "hour";
-            }
-        }
-        List<KLine> list = marketService.findAllKLine(symbol,from,to,period);
+        List<KLine> list = marketService.findAllKLine(symbol,from,to,resolution);
 
         JSONArray array = new JSONArray();
         for(KLine item:list){
@@ -268,8 +236,8 @@ public class MarketController extends BaseController{
      * @return
      */
     @RequestMapping("latest-trade")
-    public List<ExchangeTrade> latestTrade(String symbol, int size){
-        ExchangeCoin exchangeCoin = coinService.findBySymbol(symbol);
+    public List<ExchangeTrade> latestTrade(String symbol,  Integer size){
+        if(size==null) size=20;
         List<ExchangeTrade> exchangeTrades = exchangeTradeService.findLatest(symbol,size);
         return exchangeTrades;
     }

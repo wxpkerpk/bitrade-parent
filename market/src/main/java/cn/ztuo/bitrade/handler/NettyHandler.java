@@ -113,7 +113,7 @@ public class NettyHandler implements MarketHandler {
 
     @Override
     public void handleKLine(String symbol, KLine kLine) {
-        kLine.setSymbol(symbol);
+        kLine.setSymmbol(symbol);
         hawkPushService.pushMsg(NettyCacheUtils.getChannel(symbol),NettyCommand.PUSH_EXCHANGE_KLINE, JSONObject.toJSONString(kLine).getBytes());
     }
 

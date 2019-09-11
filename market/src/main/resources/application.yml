@@ -85,3 +85,16 @@ spring:
       retries: 0
   session:
     store-type: none
+
+
+
+jetcache:
+  areaInCacheName: false
+  local:
+    default:
+      keyConvertor: fastjson
+      type: linkedhashmap
+  statIntervalMinutes: 60
+influx:
+  database: bitcola
+  host: http://120.79.250.164:8086

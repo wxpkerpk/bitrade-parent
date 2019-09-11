@@ -2,6 +2,7 @@ package cn.ztuo.bitrade;
 
 import cn.ztuo.bitrade.component.CoinExchangeRate;
 import cn.ztuo.bitrade.entity.ExchangeCoin;
+import cn.ztuo.bitrade.job.KLineGeneratorJob;
 import cn.ztuo.bitrade.processor.CoinProcessor;
 import cn.ztuo.bitrade.processor.CoinProcessorFactory;
 import cn.ztuo.bitrade.service.ExchangeCoinService;
@@ -25,7 +26,8 @@ public class ApplicationEvent implements ApplicationListener<ContextRefreshedEve
     private CoinExchangeRate coinExchangeRate;
     @Value("${exchange.anchored-coins:USDT-USD}")
     private String legalAnchoredCoins;
-
+    @Autowired
+    KLineGeneratorJob kLineGeneratorJob;
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
         log.info("====初始化CoinExchangeRate====");
@@ -47,10 +49,12 @@ public class ApplicationEvent implements ApplicationListener<ContextRefreshedEve
         log.info("====初始化CoinProcessor====");
         List<ExchangeCoin> coins = coinService.findAllEnabled();
         coins.forEach(coin->{
+            kLineGeneratorJob.startKlineService(coin.getSymbol());
             CoinProcessor processor = coinProcessorFactory.getProcessor(coin.getSymbol());
             processor.initializeThumb();
             processor.initializeUsdRate();
             processor.setIsHalt(false);
+
         });
     }
 }

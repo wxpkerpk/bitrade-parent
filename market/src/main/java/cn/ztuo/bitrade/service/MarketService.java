@@ -17,7 +17,8 @@ import java.util.List;
 public class MarketService {
     @Autowired
     private MongoTemplate mongoTemplate;
-
+    @Autowired
+    KlineService klineService;
     public List<KLine> findAllKLine(String symbol,String peroid){
         Sort sort = new Sort(new Sort.Order(Sort.Direction.DESC,"time"));
         Query query = new Query().with(sort).limit(1000);
@@ -26,10 +27,26 @@ public class MarketService {
     }
 
     public List<KLine> findAllKLine(String symbol,long fromTime,long toTime,String period){
-        Criteria criteria = Criteria.where("time").gte(fromTime).andOperator(Criteria.where("time").lte(toTime));
-        Sort sort = new Sort(new Sort.Order(Sort.Direction.ASC,"time"));
-        Query query = new Query(criteria).with(sort);
-        List<KLine> kLines = mongoTemplate.find(query,KLine.class,"exchange_kline_"+symbol+"_"+ period);
+        if(period.endsWith("H") || period.endsWith("h")){
+            period = period.substring(0,period.length()-1) + "h";
+        }
+        else if(period.endsWith("D") || period.endsWith("d")){
+            period = period.substring(0,period.length()-1) + "d";
+        }
+        else if(period.endsWith("W") || period.endsWith("w")){
+            period = period.substring(0,period.length()-1) + "w";
+        }
+        else if(period.endsWith("M") || period.endsWith("m")){
+            period = period.substring(0,period.length()-1) + "m";
+        } else {
+            Integer val = Integer.parseInt(period);
+            if (val < 60) {
+                period = period + "m";
+            } else {
+                period = (val / 60) + "h";
+            }
+        }
+        List<KLine> kLines =        klineService.kline(symbol,fromTime,toTime,2000,period);
         return kLines;
     }
 

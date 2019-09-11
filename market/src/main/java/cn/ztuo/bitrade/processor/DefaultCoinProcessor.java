@@ -59,7 +59,7 @@ public class DefaultCoinProcessor implements CoinProcessor {
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         long firstTimeOfToday = calendar.getTimeInMillis();
-        String period = "1min";
+        String period = "1m";
         logger.info("initializeThumb from {} to {}", firstTimeOfToday, nowTime);
         List<KLine> lines = service.findAllKLine(this.symbol, firstTimeOfToday, nowTime, period);
         coinThumb = new CoinThumb();
@@ -164,27 +164,7 @@ public class DefaultCoinProcessor implements CoinProcessor {
     }
 
 
-    public void autoGenerate() {
-        DateFormat df = new SimpleDateFormat("HH:mm:ss");
-        logger.info("auto generate 1min kline in {},data={}", df.format(new Date(currentKLine.getTime())), JSON.toJSONString(currentKLine));
-        if(coinThumb != null) {
-            synchronized (currentKLine) {
-                //没有成交价时存储上一笔成交价
-                if (currentKLine.getOpenPrice().compareTo(BigDecimal.ZERO) == 0) {
-                    currentKLine.setOpenPrice(coinThumb.getClose());
-                    currentKLine.setLowestPrice(coinThumb.getClose());
-                    currentKLine.setHighestPrice(coinThumb.getClose());
-                    currentKLine.setClosePrice(coinThumb.getClose());
-                }
-                Calendar calendar = Calendar.getInstance();
-                calendar.set(Calendar.SECOND, 0);
-                calendar.set(Calendar.MILLISECOND, 0);
-                currentKLine.setTime(calendar.getTimeInMillis());
-                handleKLineStorage(currentKLine);
-                createNewKLine();
-            }
-        }
-    }
+
 
     @Override
     public void setIsHalt(boolean status) {
