@@ -10,25 +10,26 @@ public class KLine {
     public KLine(){
 
     }
-
     public KLine(String period){
         this.period = period;
     }
-    //交易对 ETH/USDT
-    private String symbol ;
-    //开盘价
     private BigDecimal openPrice = BigDecimal.ZERO;
-    //最高价
     private BigDecimal highestPrice  = BigDecimal.ZERO;
-    //最低价
     private BigDecimal lowestPrice  = BigDecimal.ZERO;
-    // 收盘价
     private BigDecimal closePrice  = BigDecimal.ZERO;
-    //时间戳
+    private String symmbol;
     private long time;
-    //单位 1min 5min
     private String period;
+    public KLine(String period, BigDecimal open, BigDecimal high, BigDecimal low, BigDecimal close, long time){
 
+        this.period=period;
+        this.openPrice=open;
+        this.highestPrice=high;
+        this.lowestPrice=low;
+        this.closePrice=close;
+
+        this.time=time;
+    }
     /**
      * 成交笔数
      */
