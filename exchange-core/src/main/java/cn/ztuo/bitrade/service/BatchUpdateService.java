@@ -109,7 +109,7 @@ public class BatchUpdateService {
         BalanceItems in = itemsMap.getOrDefault(inWalletId, new BalanceItems());
         in.setWalletId(inWalletId);
         in.setAvailableAmount(in.getAvailableAmount().add(processOrderResult.getIncomeCoinAmount()));
-        itemsMap.put(inSymbol1, out);
+        itemsMap.put(inSymbol1, in);
     }
 
     @Transactional

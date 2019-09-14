@@ -32,8 +32,13 @@ public class ClearHandlerService {
     void putMessage(final String pair, ProcessTradeMessage processTradeMessage) {
 
         if (!queueMap.containsKey(pair)) {
-            queueMap.put(pair, new BatchBlockQuque<>());
-            executorService.submit(new Handler());
+            synchronized (ClearHandlerService.class){//线程安全
+                if (!queueMap.containsKey(pair)) {
+                    queueMap.put(pair, new BatchBlockQuque<>());
+                    executorService.submit(new Handler());
+                }
+            }
+
         }
         BatchBlockQuque<ProcessTradeMessage> quque = queueMap.get(pair);
         quque.putMessage(processTradeMessage);
