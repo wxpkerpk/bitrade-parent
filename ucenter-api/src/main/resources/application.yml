@@ -17,6 +17,13 @@ bdtop:
 #commission:
 #  need:
 #    real-name: '@commission.need.real-name@'
+
+water:
+  proof:
+    app:
+      id: 2040846200
+      secret:
+        key: 098wG2E_Mmq8_Hor_ejpxnw**
 eureka:
   client:
     serviceUrl:
@@ -31,7 +38,7 @@ google:
   auth:
     url: '@google.auth.url@'
 management:
-  context-path: '@management.context-path@'
+  context-path: /monitor
   security:
     enabled: false
 person:
@@ -43,8 +50,8 @@ redis:
   port: 6379
 security:
   user:
-    name: '@security.user.name@'
-    password: '@security.user.password@'
+    name: bihuoAdmin
+    password: root
 server:
   context-path: /uc
   port: 6001

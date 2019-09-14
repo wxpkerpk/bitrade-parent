@@ -388,15 +388,15 @@ public class MemberWalletService extends BaseService {
         return depositDao.findByAddressAndTxid(address,txid);
     }
 
-    public void decreaseFrozen(Long walletId,BigDecimal amount){
+    public void decreaseFrozen(String walletId,BigDecimal amount){
         memberWalletDao.decreaseFrozen(walletId,amount);
     }
 
-    public void decreaseBalance(Long walletId,BigDecimal amount){
+    public void decreaseBalance(String walletId,BigDecimal amount){
         memberWalletDao.decreaseBalance(walletId,amount);
     }
 
-    public void increaseBalance(Long walletId,BigDecimal amount){
+    public void increaseBalance(String walletId,BigDecimal amount){
         memberWalletDao.increaseBalance(walletId,amount);
     }
 

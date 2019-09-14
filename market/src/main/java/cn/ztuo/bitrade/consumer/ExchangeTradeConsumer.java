@@ -31,7 +31,10 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -116,30 +119,30 @@ public class ExchangeTradeConsumer {
         }
     }
 
-    /**
-     * 订单完成
-     * @param records
-     */
-    @KafkaListener(topics = "exchange-order-completed",  containerFactory = "kafkaListenerContainerFactory")
-    public void handleOrderCompleted(List<ConsumerRecord<String,String>> records) {
-        for (int i = 0; i < records.size(); i++) {
-            ConsumerRecord<String, String> record = records.get(i);
-            logger.info("exchange-order-completed topic={},accessKey={},value={}", record.topic(), record.key(), record.value());
-            String symbol = record.key();
-            try {
-                List<ExchangeOrder> orders = JSON.parseArray(record.value(), ExchangeOrder.class);
-                for (ExchangeOrder order : orders) {
-                    //委托成交完成处理
-                    exchangeOrderService.orderCompleted(order.getOrderId(), order.getTradedAmount(), order.getTurnover());
-                    //推送订单成交
-                    messagingTemplate.convertAndSend("/topic/market/order-completed/" + symbol + "/" + order.getMemberId(), order);
-                    nettyHandler.handleOrder(NettyCommand.PUSH_EXCHANGE_ORDER_COMPLETED, order);
-                }
-            } catch (Exception e) {
-                logger.info(" 订单完成ERROR={}", e);
-            }
-        }
-    }
+//    /**
+//     * 订单完成
+//     * @param records
+//     */
+//    @KafkaListener(topics = "exchange-order-completed",  containerFactory = "kafkaListenerContainerFactory")
+//    public void handleOrderCompleted(List<ConsumerRecord<String,String>> records) {
+//        for (int i = 0; i < records.size(); i++) {
+//            ConsumerRecord<String, String> record = records.get(i);
+//            logger.info("exchange-order-completed topic={},accessKey={},value={}", record.topic(), record.key(), record.value());
+//            String symbol = record.key();
+//            try {
+//                List<ExchangeOrder> orders = JSON.parseArray(record.value(), ExchangeOrder.class);
+//                for (ExchangeOrder order : orders) {
+//                    //委托成交完成处理
+//                    exchangeOrderService.orderCompleted(order.getOrderId(), order.getTradedAmount(), order.getTurnover());
+//                    //推送订单成交
+////                    messagingTemplate.convertAndSend("/topic/market/order-completed/" + symbol + "/" + order.getMemberId(), order);
+////                    nettyHandler.handleOrder(NettyCommand.PUSH_EXCHANGE_ORDER_COMPLETED, order);
+//                }
+//            } catch (Exception e) {
+//                logger.info(" 订单完成ERROR={}", e);
+//            }
+//        }
+//    }
 
     /**
      * 处理模拟交易
@@ -193,6 +196,7 @@ public class ExchangeTradeConsumer {
      */
     @KafkaListener(topics = "exchange-order-cancel-success",containerFactory = "kafkaListenerContainerFactory")
     public void handleOrderCanceled(List<ConsumerRecord<String,String>> records) {
+        Map<String,List<Object>>topicItems=new HashMap<>();
         for (int i = 0; i < records.size(); i++) {
             ConsumerRecord<String, String> record = records.get(i);
             try {
@@ -200,15 +204,26 @@ public class ExchangeTradeConsumer {
                 String symbol = record.key();
                 ExchangeOrder order = JSON.parseObject(record.value(), ExchangeOrder.class);
                 //调用服务处理
-                MessageResult messageResult = exchangeOrderService.orderCanceled(order.getOrderId(), order.getTradedAmount(), order.getTurnover());
+                MessageResult messageResult = exchangeOrderService.orderCanceled(order, order.getTradedAmount(), order.getTurnover());
                 logger.info("取消订单成功messageResult={}",messageResult);
                 //推送实时成交
+                String topic="/topic/market/order-canceled/" + symbol + "/" + order.getMemberId();
                 messagingTemplate.convertAndSend("/topic/market/order-canceled/" + symbol + "/" + order.getMemberId(), order);
-                nettyHandler.handleOrder(NettyCommand.PUSH_EXCHANGE_ORDER_CANCELED, order);
+                if(topicItems.containsKey(topic)){
+                    List<Object>objectList=topicItems.get(topic);
+                    objectList.add(order);
+                }else{
+                    List<Object>objectList=new ArrayList<>(4);
+                    objectList.add(order);
+                    topicItems.put(topic,objectList);
+                }
             } catch (Exception e) {
                 logger.info("取消订单ERROR={}", e);
             }
         }
+        topicItems.forEach((topic,items) -> {
+            messagingTemplate.convertAndSend(topic, items);
+        });
     }
 
     public class HandleTradeThread  implements Runnable{
@@ -229,8 +244,8 @@ public class ExchangeTradeConsumer {
                     //成交明细处理
                     exchangeOrderService.processExchangeTrade(trade, secondReferrerAward);
                     //推送订单成交订阅
-                    ExchangeOrder buyOrder = exchangeOrderService.findOne(trade.getBuyOrderId());
-                    ExchangeOrder sellOrder = exchangeOrderService.findOne(trade.getSellOrderId());
+                    ExchangeOrder buyOrder = trade.getBuyOrder();
+                    ExchangeOrder sellOrder = trade.getSellOder();
                     messagingTemplate.convertAndSend("/topic/market/order-trade/" + symbol + "/" + buyOrder.getMemberId(), buyOrder);
                     messagingTemplate.convertAndSend("/topic/market/order-trade/" + symbol + "/" + sellOrder.getMemberId(), sellOrder);
                     nettyHandler.handleOrder(NettyCommand.PUSH_EXCHANGE_ORDER_TRADE, buyOrder);

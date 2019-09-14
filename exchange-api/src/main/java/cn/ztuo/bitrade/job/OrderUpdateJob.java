@@ -31,7 +31,7 @@ public class OrderUpdateJob {
     private RestTemplate restTemplate;
     private Logger logger = LoggerFactory.getLogger(OrderUpdateJob.class);
 
-    @Scheduled(fixedRate = 60*1000)
+//    @Scheduled(fixedRate = 60*1000)
     public void autoCancelOrder(){
         logger.info("start autoCancelOrder...");
         List<ExchangeCoin> coinList = coinService.findAllEnabled();

@@ -51,5 +51,5 @@ public class LockPositionRecord {
     @Column(columnDefinition = "decimal(18,8) comment '锁仓金额'")
     private BigDecimal amount;
 
-    private Long walletId;
+    private String walletId;
 }

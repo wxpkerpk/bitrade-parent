@@ -189,7 +189,6 @@ public class MarketController extends BaseController{
     public JSONArray findSymbolThumbWithTrend(){
         List<ExchangeCoin> coins = coinService.findAllEnabled();
 
-        long nowTime = System.currentTimeMillis();
         JSONArray array = new JSONArray();
         for(ExchangeCoin coin:coins){
             CoinProcessor processor = coinProcessorFactory.getProcessor(coin.getSymbol());

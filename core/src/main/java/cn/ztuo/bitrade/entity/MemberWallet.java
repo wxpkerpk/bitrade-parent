@@ -16,9 +16,18 @@ import java.math.BigDecimal;
 @Data
 @Table(uniqueConstraints ={@UniqueConstraint(columnNames={"memberId", "coin_id"})})
     public class MemberWallet {
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+
+    public String makeId()
+    {
+        return coinUnit+":"+memberId;
+
+    }
+    public static String makeWalletId(String unit,Long memberId){
+        return unit+":"+memberId;
+    }
     @Id
-    private Long id;
+    private String id;
     private Long memberId;
 
     @ManyToOne
@@ -56,4 +65,7 @@ import java.math.BigDecimal;
      */
     @Column(columnDefinition = "decimal(18,8) comment '释放余额'")
     private BigDecimal releaseBalance;
+
+    @Column(name = "coin_unit")
+    String coinUnit;
 }

@@ -21,6 +21,10 @@ public class ExchangeTrade implements Serializable{
     private String buyOrderId;
     private String sellOrderId;
     private Long time;
+    private Long buyUserId;
+    private Long sellUserId;
+    private ExchangeOrder sellOder;
+    private ExchangeOrder buyOrder;
 
     @Override
     public String toString() {

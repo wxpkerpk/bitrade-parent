@@ -29,6 +29,10 @@ public class ExchangeOrder implements Serializable {
      */
     @Column(columnDefinition = "decimal(18,8) DEFAULT 0 ")
     private BigDecimal amount = BigDecimal.ZERO;
+
+
+
+
     /**
      * 交易对符号
      */
@@ -112,5 +116,13 @@ public class ExchangeOrder implements Serializable {
                 return amount.compareTo(tradedAmount) <= 0;
             }
         }
+    }
+
+
+    public String getPair()
+    {
+        return coinSymbol+"/"+baseSymbol;
+
+
     }
 }

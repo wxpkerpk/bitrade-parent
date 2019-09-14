@@ -22,7 +22,7 @@ public interface MemberWalletDao extends BaseDao<MemberWallet> {
      */
     @Modifying
     @Query("update MemberWallet wallet set wallet.balance = wallet.balance + :amount where wallet.id = :walletId")
-    int increaseBalance(@Param("walletId") long walletId, @Param("amount") BigDecimal amount);
+    int increaseBalance(@Param("walletId") String walletId, @Param("amount") BigDecimal amount);
 
     /**
      * 减少钱包余额
@@ -33,7 +33,7 @@ public interface MemberWalletDao extends BaseDao<MemberWallet> {
      */
     @Modifying
     @Query("update MemberWallet wallet set wallet.balance = wallet.balance - :amount where wallet.id = :walletId and wallet.balance >= :amount")
-    int decreaseBalance(@Param("walletId") long walletId, @Param("amount") BigDecimal amount);
+    int decreaseBalance(@Param("walletId") String walletId, @Param("amount") BigDecimal amount);
 
 
     /**
@@ -45,7 +45,7 @@ public interface MemberWalletDao extends BaseDao<MemberWallet> {
      */
     @Modifying
     @Query("update MemberWallet wallet set wallet.balance = wallet.balance + :amount,wallet.frozenBalance=wallet.frozenBalance - :amount where wallet.id = :walletId and wallet.frozenBalance >= :amount")
-    int thawBalance(@Param("walletId") long walletId, @Param("amount") BigDecimal amount);
+    int thawBalance(@Param("walletId") String walletId, @Param("amount") BigDecimal amount);
 
 
     /**
@@ -57,7 +57,7 @@ public interface MemberWalletDao extends BaseDao<MemberWallet> {
      */
     @Modifying
     @Query("update MemberWallet wallet set wallet.balance = wallet.balance - :amount,wallet.frozenBalance=wallet.frozenBalance + :amount where wallet.id = :walletId and wallet.balance >= :amount")
-    int freezeBalance(@Param("walletId") long walletId, @Param("amount") BigDecimal amount);
+    int freezeBalance(@Param("walletId") String walletId, @Param("amount") BigDecimal amount);
 
 
     /**
@@ -69,7 +69,7 @@ public interface MemberWalletDao extends BaseDao<MemberWallet> {
      */
     @Modifying
     @Query("update MemberWallet wallet set wallet.frozenBalance=wallet.frozenBalance - :amount where wallet.id = :walletId and wallet.frozenBalance >= :amount")
-    int decreaseFrozen(@Param("walletId") long walletId, @Param("amount") BigDecimal amount);
+    int decreaseFrozen(@Param("walletId") String walletId, @Param("amount") BigDecimal amount);
 
 
     MemberWallet findByCoinAndAddress(Coin coin, String address);

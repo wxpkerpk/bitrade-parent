@@ -212,7 +212,6 @@ public class CoinTrader {
         //每个订单的匹配批量推送
         handleExchangeTrade(exchangeTrades);
         if(completedOrders.size() > 0){
-            orderCompleted(completedOrders);
             TradePlate plate = focusedOrder.getDirection() == ExchangeOrderDirection.BUY ? sellTradePlate : buyTradePlate;
             sendTradePlateMessage(plate);
         }
@@ -254,7 +253,6 @@ public class CoinTrader {
         }
         //每个订单的匹配批量推送
         handleExchangeTrade(exchangeTrades);
-        orderCompleted(completedOrders);
     }
 
 
@@ -307,7 +305,7 @@ public class CoinTrader {
         //每个订单的匹配批量推送
         handleExchangeTrade(exchangeTrades);
         if(completedOrders.size() > 0){
-            orderCompleted(completedOrders);
+//            orderCompleted(completedOrders);
             TradePlate plate = focusedOrder.getDirection() == ExchangeOrderDirection.BUY ? sellTradePlate : buyTradePlate;
             sendTradePlateMessage(plate);
         }
@@ -402,11 +400,19 @@ public class CoinTrader {
         }
 
         if (focusedOrder.getDirection() == ExchangeOrderDirection.BUY) {
+            exchangeTrade.setBuyUserId(focusedOrder.getMemberId());
+            exchangeTrade.setSellUserId(matchOrder.getMemberId());
             exchangeTrade.setBuyOrderId(focusedOrder.getOrderId());
             exchangeTrade.setSellOrderId(matchOrder.getOrderId());
+            exchangeTrade.setBuyOrder(focusedOrder);
+            exchangeTrade.setSellOder(matchOrder);
         } else {
             exchangeTrade.setBuyOrderId(matchOrder.getOrderId());
             exchangeTrade.setSellOrderId(focusedOrder.getOrderId());
+            exchangeTrade.setBuyUserId(matchOrder.getMemberId());
+            exchangeTrade.setSellUserId(focusedOrder.getMemberId());
+            exchangeTrade.setBuyOrder(matchOrder);
+            exchangeTrade.setSellOder(focusedOrder);
         }
 
         exchangeTrade.setTime(Calendar.getInstance().getTimeInMillis());
@@ -442,28 +448,6 @@ public class CoinTrader {
         }
     }
 
-    /**
-     * 订单完成，执行消息通知,订单数超1000个要拆分发送
-     * @param orders
-     */
-    public  void orderCompleted(List<ExchangeOrder> orders){
-        logger.info("orderCompleted ,order={}",orders);
-        if(orders.size() > 0) {
-            int maxSize = 1000;
-            if(orders.size() > maxSize){
-                int size = orders.size();
-                for(int index = 0;index < size;index += maxSize){
-                    int length = (size - index) > maxSize ? maxSize : size - index;
-                    List<ExchangeOrder> subOrders = orders.subList(index,index + length);
-                    kafkaTemplate.send("exchange-order-completed", symbol, JSON.toJSONString(subOrders));
-                    logger.info("拆分发送订单完成消息={}",symbol);
-                }
-            } else {
-                kafkaTemplate.send("exchange-order-completed", symbol, JSON.toJSONString(orders));
-                logger.info("发送订单完成消息={}",symbol);
-            }
-        }
-    }
 
     /**
      * 发送盘口变化消息

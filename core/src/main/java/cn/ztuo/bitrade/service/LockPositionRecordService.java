@@ -49,7 +49,7 @@ public class LockPositionRecordService extends BaseService {
             List<Long> ids=new ArrayList<>();
             List<MemberTransaction> memberTransactionList=new ArrayList<>();
             for(LockPositionRecord lockPositionRecord:lockPositionRecordList){
-                memberWalletDao.thawBalance(lockPositionRecord.getWalletId(),lockPositionRecord.getAmount());
+                memberWalletDao.thawBalance(lockPositionRecord.getWalletId().toString(),lockPositionRecord.getAmount());
                 MemberTransaction memberTransaction=new MemberTransaction();
                 memberTransaction.setMemberId(lockPositionRecord.getMemberId());
                 memberTransaction.setAmount(lockPositionRecord.getAmount());

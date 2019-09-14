@@ -71,9 +71,6 @@ public class OrderController {
             return MessageResult.error(500,msService.getMessage("ILLEGAL_ARGUMENT"));
         }
         Member member=memberService.findOne(authMember.getId());
-        if(member.getMemberLevel()== MemberLevelEnum.GENERAL){
-            return MessageResult.error(500,"请先进行实名认证");
-        }
         //是否被禁止交易
         if(member.getTransactionStatus().equals(BooleanEnum.IS_FALSE)){
             return MessageResult.error(500,msService.getMessage("CANNOT_TRADE"));
