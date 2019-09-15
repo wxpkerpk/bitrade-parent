@@ -49,6 +49,8 @@ public class ExchangeOrder implements Serializable {
         exchangeOrder.setAmountStr(this.getAmountStr());
         exchangeOrder.setMarginTrade(this.getMarginTrade());
         exchangeOrder.setMemberId(this.memberId);
+        exchangeOrder.setSymbol(symbol);
+        exchangeOrder.setType(type);
 
         return exchangeOrder;
 

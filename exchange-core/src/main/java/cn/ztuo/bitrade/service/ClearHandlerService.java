@@ -23,13 +23,13 @@ public class ClearHandlerService {
 
     @Autowired
     BatchUpdateService batchUpdateService;
-    Map<String, BatchBlockQuque<ProcessTradeMessage>> queueMap = new ConcurrentHashMap<>();
+    Map<String, BatchBlockQuque<Object>> queueMap = new ConcurrentHashMap<>();
 
     ExecutorService executorService=Executors.newFixedThreadPool(200);
 
 
 
-    void putMessage(final String pair, ProcessTradeMessage processTradeMessage) {
+    void putMessage(final String pair, Object message) {
 
         if (!queueMap.containsKey(pair)) {
             synchronized (ClearHandlerService.class){//线程安全
@@ -42,21 +42,21 @@ public class ClearHandlerService {
             }
 
         }
-        BatchBlockQuque<ProcessTradeMessage> quque = queueMap.get(pair);
-        quque.putMessage(processTradeMessage);
+        BatchBlockQuque<Object> quque = queueMap.get(pair);
+        quque.putMessage(message);
     }
 
 
 
     public class Handler implements Runnable {
-        public volatile BatchBlockQuque<ProcessTradeMessage> batchBlockQuque;
+        public volatile BatchBlockQuque<Object> batchBlockQuque;
 
 
         @Override
         public void run() {
             while (true) {
                 try {
-                    List<ProcessTradeMessage> processTradeMessages = batchBlockQuque.getMessage();
+                    List<Object> processTradeMessages = batchBlockQuque.getMessage();
                     batchUpdateService.mergeAndUpdate(processTradeMessages);
                 }catch (Throwable e){
                     e.printStackTrace();

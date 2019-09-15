@@ -13,6 +13,10 @@ import java.util.List;
 
 public interface MemberWalletDao extends BaseDao<MemberWallet> {
 
+
+    @Query(value="select * from member_wallet a where a.id=:id ",nativeQuery = true)
+    MemberWallet findById(@Param("id") String walletId);
+
     /**
      * 增加钱包余额
      *
@@ -20,6 +24,8 @@ public interface MemberWalletDao extends BaseDao<MemberWallet> {
      * @param amount
      * @return
      */
+
+
     @Modifying
     @Query("update MemberWallet wallet set wallet.balance = wallet.balance + :amount where wallet.id = :walletId")
     int increaseBalance(@Param("walletId") String walletId, @Param("amount") BigDecimal amount);

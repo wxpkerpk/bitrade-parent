@@ -94,6 +94,7 @@ public class BatchUpdateService {
             balanceItems.setWalletId(walletId);
             balanceItems.setFrozenAmount(balanceItems.getFrozenAmount().add(item.getAmount()));
             balanceItems.setAvailableAmount(balanceItems.getAvailableAmount().add(item.getAmount()));
+            itemsMap.put(walletId,balanceItems);
         }
     }
 
@@ -114,7 +115,7 @@ public class BatchUpdateService {
 
     @Transactional
     @Modifying
-    public void mergeAndUpdate( List<ProcessTradeMessage> processTradeMessages){
+    public void mergeAndUpdate( List<Object> processTradeMessages){
 
         Map<String, BalanceItems> itemsMap = new TreeMap<>();//有序
         List<ExchangeOrder> completedOrders = new ArrayList<>(processTradeMessages.size() * 2);
@@ -122,18 +123,28 @@ public class BatchUpdateService {
         List<OrderDetailAggregation> detailAggregations = new ArrayList<>(processTradeMessages.size() * 2);
         List<ExchangeOrderDetail> details = new ArrayList<>(processTradeMessages.size() * 2);
 
-        for (ProcessTradeMessage message : processTradeMessages) {
-            long userId = message.getBuyOrderProcessResult().getUserId();
-            addLogs(transactions, detailAggregations, details, message);
+        for (Object m : processTradeMessages) {
 
-            ProcessOrderResult processOrderResult = message.getBuyOrderProcessResult();
-            mergeBalance(itemsMap, userId, processOrderResult);
-            mergeBalance(itemsMap, message.getSellOrderProcessResult().getUserId(), message.getSellOrderProcessResult());
-            RefundItem item = message.getBuyRefund();
-            mergeRefund(itemsMap, item);
-            mergeRefund(itemsMap, message.getSellRefund());
-            if (message.getBuyRefund() != null&&message.getBuyRefund().getOrder()!=null) completedOrders.add(message.getBuyRefund().getOrder());
-            if (message.getSellRefund() != null&&message.getSellRefund().getOrder()!=null) completedOrders.add(message.getSellRefund().getOrder());
+            if(m instanceof ProcessTradeMessage) {
+                ProcessTradeMessage message= (ProcessTradeMessage) m;
+                long userId = message.getBuyOrderProcessResult().getUserId();
+                addLogs(transactions, detailAggregations, details, message);
+
+                ProcessOrderResult processOrderResult = message.getBuyOrderProcessResult();
+                mergeBalance(itemsMap, userId, processOrderResult);
+                mergeBalance(itemsMap, message.getSellOrderProcessResult().getUserId(), message.getSellOrderProcessResult());
+                RefundItem item = message.getBuyRefund();
+                mergeRefund(itemsMap, item);
+                mergeRefund(itemsMap, message.getSellRefund());
+                if (message.getBuyRefund() != null && message.getBuyRefund().getOrder() != null)
+                    completedOrders.add(message.getBuyRefund().getOrder());
+                if (message.getSellRefund() != null && message.getSellRefund().getOrder() != null)
+                    completedOrders.add(message.getSellRefund().getOrder());
+            }else if(m instanceof RefundItem){
+                RefundItem refundItem= (RefundItem) m;
+                mergeRefund(itemsMap, refundItem);
+                completedOrders.add(refundItem.getOrder());
+            }
         }
 
         List<BalanceItems> balanceItems = new ArrayList<>(itemsMap.size());

@@ -2,6 +2,8 @@ package cn.ztuo.bitrade.service;
 
 
 import cn.ztuo.bitrade.core.DB;
+import cn.ztuo.bitrade.dao.MemberWalletDao;
+import cn.ztuo.bitrade.dto.MemberWalletDTO;
 import cn.ztuo.bitrade.util.GeneratorUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.querydsl.core.types.Predicate;
@@ -89,6 +91,8 @@ public class ExchangeOrderService extends BaseService<MemberWallet> {
 
     @Autowired
     ClearHandlerService clearHandlerService;
+    @Autowired
+    MemberWalletDao memberWalletDao;
     /**
      * 添加委托订单
      *
@@ -108,7 +112,8 @@ public class ExchangeOrderService extends BaseService<MemberWallet> {
         order.setOrderId(GeneratorUtil.getOrderId("E"));
         log.info("add order:{}", order);
         if (order.getDirection() == ExchangeOrderDirection.BUY) {
-            MemberWallet wallet = (MemberWallet) memberWalletService.findById(MemberWallet.makeWalletId(order.getBaseSymbol(), memberId));
+            String walletID=MemberWallet.makeWalletId(order.getBaseSymbol(), memberId);
+            MemberWallet wallet =memberWalletDao.findById(walletID);
             if (wallet.getIsLock().equals(BooleanEnum.IS_TRUE)) {
                 return MessageResult.error("钱包已锁定");
             }
@@ -123,7 +128,8 @@ public class ExchangeOrderService extends BaseService<MemberWallet> {
                 return MessageResult.error(500, msService.getMessage("INSUFFICIENT_COIN") + order.getBaseSymbol());
             }
         } else if (order.getDirection() == ExchangeOrderDirection.SELL) {
-            MemberWallet wallet = (MemberWallet) memberWalletService.findById(MemberWallet.makeWalletId(order.getCoinSymbol(), memberId));
+            MemberWallet wallet =memberWalletDao.findById(MemberWallet.makeWalletId(order.getCoinSymbol(), memberId));
+
             if (wallet.getIsLock().equals(BooleanEnum.IS_TRUE)) {
                 return MessageResult.error("钱包已锁定");
             }
@@ -568,10 +574,11 @@ public class ExchangeOrderService extends BaseService<MemberWallet> {
         order.setTurnover(turnover);
         order.setStatus(ExchangeOrderStatus.CANCELED);
         order.setCanceledTime(Calendar.getInstance().getTimeInMillis());
-        //未成交的退款
-        //根据memberId锁表，防止死锁
-        DB.query("select id from member_wallet where member_id = ? for update;", order.getMemberId());
-        orderRefund(order, tradedAmount, turnover);
+//        //未成交的退款
+//        //根据memberId锁表，防止死锁
+//        DB.query("select id from member_wallet where member_id = ? for update;", order.getMemberId());
+        RefundItem refundItem=  orderRefund(order, tradedAmount, turnover);
+        clearHandlerService.putMessage(order.getPair(),refundItem);
         return MessageResult.success();
     }
 
