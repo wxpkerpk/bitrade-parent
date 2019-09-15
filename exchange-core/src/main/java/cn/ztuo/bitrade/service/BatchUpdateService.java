@@ -88,7 +88,7 @@ public class BatchUpdateService {
     }
 
     private void mergeRefund(Map<String, BalanceItems> itemsMap, RefundItem item) {
-        if (item != null) {
+        if (item != null&&item.getAmount()!=null&&item.getAmount().compareTo(BigDecimal.ZERO)>0) {
             String walletId = MemberWallet.makeWalletId(item.getCoinSymbol(), item.getUserId());
             BalanceItems balanceItems = itemsMap.getOrDefault(walletId, new BalanceItems());
             balanceItems.setWalletId(walletId);
@@ -105,11 +105,11 @@ public class BatchUpdateService {
         BalanceItems out = itemsMap.getOrDefault(outWalletId, new BalanceItems());
         out.setWalletId(outWalletId);
         out.setFrozenAmount(out.getFrozenAmount().add(processOrderResult.getOutcomeCoinAmount()));
-        itemsMap.put(outSymbol, out);
+        itemsMap.put(outWalletId, out);
         BalanceItems in = itemsMap.getOrDefault(inWalletId, new BalanceItems());
         in.setWalletId(inWalletId);
         in.setAvailableAmount(in.getAvailableAmount().add(processOrderResult.getIncomeCoinAmount()));
-        itemsMap.put(inSymbol1, in);
+        itemsMap.put(inWalletId, in);
     }
 
     @Transactional
@@ -132,8 +132,8 @@ public class BatchUpdateService {
             RefundItem item = message.getBuyRefund();
             mergeRefund(itemsMap, item);
             mergeRefund(itemsMap, message.getSellRefund());
-            if (message.getBuyRefund() != null) completedOrders.add(message.getBuyRefund().getOrder());
-            if (message.getSellRefund() != null) completedOrders.add(message.getSellRefund().getOrder());
+            if (message.getBuyRefund() != null&&message.getBuyRefund().getOrder()!=null) completedOrders.add(message.getBuyRefund().getOrder());
+            if (message.getSellRefund() != null&&message.getSellRefund().getOrder()!=null) completedOrders.add(message.getSellRefund().getOrder());
         }
 
         List<BalanceItems> balanceItems = new ArrayList<>(itemsMap.size());

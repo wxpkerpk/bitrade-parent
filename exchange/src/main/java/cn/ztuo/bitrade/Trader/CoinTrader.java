@@ -404,15 +404,15 @@ public class CoinTrader {
             exchangeTrade.setSellUserId(matchOrder.getMemberId());
             exchangeTrade.setBuyOrderId(focusedOrder.getOrderId());
             exchangeTrade.setSellOrderId(matchOrder.getOrderId());
-            exchangeTrade.setBuyOrder(focusedOrder);
-            exchangeTrade.setSellOder(matchOrder);
+            exchangeTrade.setBuyOrder(focusedOrder.clone());
+            exchangeTrade.setSellOder(matchOrder.clone());
         } else {
             exchangeTrade.setBuyOrderId(matchOrder.getOrderId());
             exchangeTrade.setSellOrderId(focusedOrder.getOrderId());
             exchangeTrade.setBuyUserId(matchOrder.getMemberId());
             exchangeTrade.setSellUserId(focusedOrder.getMemberId());
-            exchangeTrade.setBuyOrder(matchOrder);
-            exchangeTrade.setSellOder(focusedOrder);
+            exchangeTrade.setBuyOrder(matchOrder.clone());
+            exchangeTrade.setSellOder(focusedOrder.clone());
         }
 
         exchangeTrade.setTime(Calendar.getInstance().getTimeInMillis());

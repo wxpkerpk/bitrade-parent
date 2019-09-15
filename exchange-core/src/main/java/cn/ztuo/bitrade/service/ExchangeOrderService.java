@@ -43,7 +43,7 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class ExchangeOrderService extends BaseService {
+public class ExchangeOrderService extends BaseService<MemberWallet> {
     @Autowired
     private ExchangeOrderRepository exchangeOrderRepository;
     @Autowired
@@ -108,7 +108,7 @@ public class ExchangeOrderService extends BaseService {
         order.setOrderId(GeneratorUtil.getOrderId("E"));
         log.info("add order:{}", order);
         if (order.getDirection() == ExchangeOrderDirection.BUY) {
-            MemberWallet wallet = memberWalletService.findByCoinUnitAndMemberId(order.getBaseSymbol(), memberId);
+            MemberWallet wallet = (MemberWallet) memberWalletService.findById(MemberWallet.makeWalletId(order.getBaseSymbol(), memberId));
             if (wallet.getIsLock().equals(BooleanEnum.IS_TRUE)) {
                 return MessageResult.error("钱包已锁定");
             }
@@ -123,7 +123,7 @@ public class ExchangeOrderService extends BaseService {
                 return MessageResult.error(500, msService.getMessage("INSUFFICIENT_COIN") + order.getBaseSymbol());
             }
         } else if (order.getDirection() == ExchangeOrderDirection.SELL) {
-            MemberWallet wallet = memberWalletService.findByCoinUnitAndMemberId(order.getCoinSymbol(), memberId);
+            MemberWallet wallet = (MemberWallet) memberWalletService.findById(MemberWallet.makeWalletId(order.getCoinSymbol(), memberId));
             if (wallet.getIsLock().equals(BooleanEnum.IS_TRUE)) {
                 return MessageResult.error("钱包已锁定");
             }
@@ -132,7 +132,7 @@ public class ExchangeOrderService extends BaseService {
                 return MessageResult.error(500, msService.getMessage("INSUFFICIENT_COIN") + order.getCoinSymbol());
             }
         }
-        order = exchangeOrderRepository.saveAndFlush(order);
+        order = exchangeOrderRepository.save(order);
         if (order != null) {
             return MessageResult.success("success");
         } else {
@@ -252,6 +252,7 @@ public class ExchangeOrderService extends BaseService {
         ProcessOrderResult processOrderResult = new ProcessOrderResult();
 
 
+        processOrderResult.setUserId(order.getMemberId());
         processOrderResult.setPair(order.getPair());
         ExchangeOrderDetail orderDetail = new ExchangeOrderDetail();
         orderDetail.setOrderId(order.getOrderId());
@@ -539,7 +540,6 @@ public class ExchangeOrderService extends BaseService {
             refundItem.setCoinSymbol(coinSymbol);
             refundItem.setUserId(order.getMemberId());
             refundItem.setAmount(refundAmount);
-            return refundItem;
             //非杠杆交易订单，退回普通钱包
 //            MemberWallet wallet = memberWalletService.findByCoinUnitAndMemberId(coinSymbol, order.getMemberId());
 //            MessageResult mr = memberWalletService.thawBalance(wallet, refundAmount);
@@ -548,7 +548,7 @@ public class ExchangeOrderService extends BaseService {
 //            }
 
         }
-        return null;
+        return refundItem;
     }
 
     /**

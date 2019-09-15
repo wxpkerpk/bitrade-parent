@@ -70,6 +70,7 @@ public class ExchangeTradeConsumer {
     private CoinExchangeRate exchangeRate;
 
 
+
     @KafkaListener(topics = "exchange-market-symbol",containerFactory = "kafkaListenerContainerFactory")
     public void onAddCoinTradeByExchangeCoin(List<ConsumerRecord<String,String>> records){
         for (int i = 0; i < records.size(); i++) {

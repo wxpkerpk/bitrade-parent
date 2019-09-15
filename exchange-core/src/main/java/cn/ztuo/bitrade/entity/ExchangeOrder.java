@@ -32,6 +32,28 @@ public class ExchangeOrder implements Serializable {
 
 
 
+    public ExchangeOrder clone()
+    {
+        ExchangeOrder exchangeOrder=new ExchangeOrder();
+        exchangeOrder.setOrderId(this.getOrderId());
+        exchangeOrder.setTradedAmount(new BigDecimal(this.getTradedAmount().toString()));
+        exchangeOrder.setTurnover(new BigDecimal(this.getTurnover().toString()));
+        exchangeOrder.setStatus(this.getStatus());
+        exchangeOrder.setPrice(this.price);
+        exchangeOrder.setAmount(new BigDecimal(this.getAmount().toString()));
+        exchangeOrder.setBaseSymbol(this.getBaseSymbol());
+        exchangeOrder.setCoinSymbol(this.coinSymbol);
+        exchangeOrder.setDirection(this.getDirection());
+        exchangeOrder.setTime(this.getTime());
+        exchangeOrder.setTriggerPrice(this.getTriggerPrice());
+        exchangeOrder.setAmountStr(this.getAmountStr());
+        exchangeOrder.setMarginTrade(this.getMarginTrade());
+        exchangeOrder.setMemberId(this.memberId);
+
+        return exchangeOrder;
+
+
+    }
 
     /**
      * 交易对符号

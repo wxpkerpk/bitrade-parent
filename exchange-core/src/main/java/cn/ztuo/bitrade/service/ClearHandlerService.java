@@ -35,7 +35,9 @@ public class ClearHandlerService {
             synchronized (ClearHandlerService.class){//线程安全
                 if (!queueMap.containsKey(pair)) {
                     queueMap.put(pair, new BatchBlockQuque<>());
-                    executorService.submit(new Handler());
+                    Handler handler=new Handler();
+                    handler.batchBlockQuque= queueMap.get(pair);
+                    executorService.submit(handler);
                 }
             }
 
@@ -47,7 +49,7 @@ public class ClearHandlerService {
 
 
     public class Handler implements Runnable {
-        public BatchBlockQuque<ProcessTradeMessage> batchBlockQuque;
+        public volatile BatchBlockQuque<ProcessTradeMessage> batchBlockQuque;
 
 
         @Override
